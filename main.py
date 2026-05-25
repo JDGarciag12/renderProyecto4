@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
+from bson import ObjectId
 from datetime import datetime
+import os
 
 # =========================================================
 # CONFIGURACIÓN FASTAPI
@@ -20,7 +22,10 @@ app.add_middleware(
 # CONEXIÓN MONGODB
 # =========================================================
 
-MONGO_URI = "mongodb+srv://SamuelV:SamuelV@proyecto4.ya83sqp.mongodb.net/DannAlpes?retryWrites=true&w=majority&appName=Proyecto4"
+MONGO_URI = os.getenv(
+    "MONGO_URI",
+    "mongodb+srv://SamuelV:SamuelV@proyecto4.ya83sqo.mongodb.net/DannAlpes?retryWrites=true&w=majority&appName=Proyecto4"
+)
 
 client = MongoClient(MONGO_URI)
 
@@ -34,7 +39,7 @@ resenas = db["resenas"]
 
 def serializar_documento(doc):
 
-    if "_id" in doc:
+    if doc and "_id" in doc:
         doc["_id"] = str(doc["_id"])
 
     return doc
@@ -81,12 +86,12 @@ def crear_resena(datos: dict):
 # =========================================================
 
 @app.put("/resenas/{resena_id}")
-def editar_resena(resena_id: int, datos: dict):
+def editar_resena(resena_id: str, datos: dict):
 
     resenas.update_one(
 
         {
-            "_id": resena_id
+            "_id": ObjectId(resena_id)
         },
 
         {
@@ -109,12 +114,12 @@ def editar_resena(resena_id: int, datos: dict):
 # =========================================================
 
 @app.delete("/resenas/{resena_id}")
-def eliminar_resena(resena_id: int):
+def eliminar_resena(resena_id: str):
 
     resenas.delete_one(
 
         {
-            "_id": resena_id
+            "_id": ObjectId(resena_id)
         }
     )
 
@@ -149,7 +154,7 @@ def consultar_resenas_hotel(hotel_id: int):
 # =========================================================
 
 @app.post("/resenas/{resena_id}/util")
-def marcar_util(resena_id: int, datos: dict):
+def marcar_util(resena_id: str, datos: dict):
 
     nuevo_voto = {
 
@@ -159,7 +164,7 @@ def marcar_util(resena_id: int, datos: dict):
     resenas.update_one(
 
         {
-            "_id": resena_id
+            "_id": ObjectId(resena_id)
         },
 
         {
@@ -201,7 +206,7 @@ def historial_cliente(cliente_id: int):
 # =========================================================
 
 @app.post("/resenas/{resena_id}/respuesta")
-def responder_resena(resena_id: int, datos: dict):
+def responder_resena(resena_id: str, datos: dict):
 
     respuesta = {
 
@@ -218,7 +223,7 @@ def responder_resena(resena_id: int, datos: dict):
     resenas.update_one(
 
         {
-            "_id": resena_id
+            "_id": ObjectId(resena_id)
         },
 
         {
@@ -239,12 +244,12 @@ def responder_resena(resena_id: int, datos: dict):
 # =========================================================
 
 @app.put("/admin/resenas/{resena_id}/eliminar")
-def admin_eliminar_resena(resena_id: int):
+def admin_eliminar_resena(resena_id: str):
 
     resenas.delete_one(
 
         {
-            "_id": resena_id
+            "_id": ObjectId(resena_id)
         }
     )
 
@@ -258,14 +263,20 @@ def admin_eliminar_resena(resena_id: int):
 # =========================================================
 
 @app.put("/resenas/{resena_id}/destacar")
-def destacar_resena(resena_id: int):
+def destacar_resena(resena_id: str):
 
     resena = resenas.find_one(
 
         {
-            "_id": resena_id
+            "_id": ObjectId(resena_id)
         }
     )
+
+    if not resena:
+
+        return {
+            "error": "Reseña no encontrada"
+        }
 
     hotel_id = resena["hotel"]["id"]
 
@@ -288,7 +299,7 @@ def destacar_resena(resena_id: int):
     resenas.update_one(
 
         {
-            "_id": resena_id
+            "_id": ObjectId(resena_id)
         },
 
         {
