@@ -20,7 +20,7 @@ app.add_middleware(
 # CONEXIÓN MONGODB
 # =========================================================
 
-MONGO_URI = "mongodb+srv://SamuelV:SamuelV@proyecto4.ya83sqp.mongodb.net/?appName=Proyecto4"
+MONGO_URI = "mongodb+srv://SamuelV:SamuelV@proyecto4.ya83sqp.mongodb.net/DannAlpes?retryWrites=true&w=majority&appName=Proyecto4"
 
 client = MongoClient(MONGO_URI)
 
